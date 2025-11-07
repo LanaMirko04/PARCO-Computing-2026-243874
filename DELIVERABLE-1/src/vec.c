@@ -63,6 +63,42 @@ int vec_rand_fill(struct Vec *vec) {
     return RC_OK;
 }
 
+int vel_fill_with_real(struct Vec *vec, double val) {
+    if (!vec) {
+        rc_set_err_msg("Invalid NULL argument(s) provided to vec_fill_with_real");
+        return RC_INVALID_ARG_ERR;
+    }
+
+    if (!vec->is_real) {
+        rc_set_err_msg("Attempting to fill integer vector with real values in vec_fill_with_real");
+        return RC_INVALID_ARG_ERR;
+    }
+
+    for (size_t i = 0; i < vec->n; i++) {
+        vec->dvals[i] = val;
+    }
+
+    return RC_OK;
+}
+
+int vec_fill_with_integer(struct Vec *vec, int val) {
+    if (!vec) {
+        rc_set_err_msg("Invalid NULL argument(s) provided to vec_fill_with_integer");
+        return RC_INVALID_ARG_ERR;
+    }
+
+    if (vec->is_real) {
+        rc_set_err_msg("Attempting to fill real vector with integer values in vec_fill_with_integer");
+        return RC_INVALID_ARG_ERR;
+    }
+
+    for (size_t i = 0; i < vec->n; i++) {
+        vec->ivals[i] = val;
+    }
+
+    return RC_OK;
+}
+
 inline int vec_size(const struct Vec *vec) {
     return vec ? (int)vec->n : RC_FAIL;
 }

@@ -55,6 +55,26 @@ int vec_init(struct Vec *vec, size_t n, bool is_real, struct ArenaHandler *arena
 int vec_rand_fill(struct Vec *vec);
 
 /*!
+ * \brief           Fill the vector with a specified real value.
+ *
+ * \param[out]      vec: Pointer to the vector to fill.
+ * \param[in]       val: Real value to fill the vector with.
+ * \return          RC_OK on success, an error code otherwise:
+ *                   - RC_INVALID_ARGUMENT_ERR if vec is NULL or not real.
+ */
+int vec_fill_with_real(struct Vec *vec, double val);
+
+/*!
+ * \brief           Fill the vector with a specified integer value.
+ *
+ * \param[out]      vec: Pointer to the vector to fill.
+ * \param[in]       val: Integer value to fill the vector with.
+ * \return          RC_OK on success, an error code otherwise:
+ *                   - RC_INVALID_ARGUMENT_ERR if vec is NULL or not integer.
+ */
+int vec_fill_with_integer(struct Vec *vec, int val);
+
+/*!
  * \brief           Get the size of the vector.
  *
  * \param[in]       vec: Pointer to the vector.
