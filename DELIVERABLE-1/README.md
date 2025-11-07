@@ -3,7 +3,7 @@
 ## Instructions
 
 > [!NOTE]
-> These instructions are from the presentation slides of the course.
+> These instructions are from the slides of the course.
 
 **Develop** a code:
 1. Read a matrix in the Matrix Format and convert to CSR
