@@ -15,12 +15,12 @@
 #include "config.h"
 #include "utils.h"
 #include "rc.h"
-#include "vec.h"
 #include "arena.h"
+#include "vec.h"
 
 #include <stdlib.h>
 
-int vec_init(struct Vec *vec, size_t n, bool is_real, struct ArenaHandler *arena) {
+int vec_init(struct Vec *vec, int n, bool is_real, struct ArenaHandler *arena) {
     if (!vec || !arena) {
         rc_set_err_msg("Invalid NULL argument(s) provided to vec_init");
         return RC_INVALID_ARG_ERR;
@@ -29,18 +29,10 @@ int vec_init(struct Vec *vec, size_t n, bool is_real, struct ArenaHandler *arena
     vec->n = n;
     vec->is_real = is_real;
 
-    if (is_real) {
-        vec->dvals = arena_calloc(arena, sizeof(double), n);
-        if (!vec->dvals) {
-            rc_set_err_msg("Memory allocation failed in vec_init");
-            return RC_MEM_ALLOC_ERR;
-        }
-    } else {
-        vec->ivals = arena_calloc(arena, sizeof(int), n);
-        if (!vec->ivals) {
-            rc_set_err_msg("Memory allocation failed in vec_init");
-            return RC_MEM_ALLOC_ERR;
-        }
+    enum ArenaReturnCode res = arena_calloc(arena, is_real ? sizeof(double) : sizeof(int), n, &vec->val);
+    if (res != ARENA_RC_OK) {
+        rc_set_err_msg("Memory allocation failed in vec_init");
+        return RC_MEM_ALLOC_ERR;
     }
 
     return RC_OK;
@@ -52,11 +44,12 @@ int vec_rand_fill(struct Vec *vec) {
         return RC_INVALID_ARG_ERR;
     }
 
-    for (size_t i = 0; i < vec->n; i++) {
+    void *val = arena_get_ptr(&vec->val);
+    for (int i = 0; i < vec->n; i++) {
         if (vec->is_real) {
-            vec->dvals[i] = RAND_DOUBLE((double)CONFIG_RAND_MIN, (double)CONFIG_RAND_MAX);
+            ((double *)val)[i] = RAND_DOUBLE((double)CONFIG_RAND_MIN, (double)CONFIG_RAND_MAX);
         } else {
-            vec->ivals[i] = RAND_INT(CONFIG_RAND_MIN, CONFIG_RAND_MAX);
+            ((int *)val)[i] = RAND_INT(CONFIG_RAND_MIN, CONFIG_RAND_MAX);
         }
     }
 
@@ -74,8 +67,9 @@ int vel_fill_with_real(struct Vec *vec, double val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    for (size_t i = 0; i < vec->n; i++) {
-        vec->dvals[i] = val;
+    double *dval = (double *)arena_get_ptr(&vec->val);
+    for (int i = 0; i < vec->n; i++) {
+        dval[i] = val;
     }
 
     return RC_OK;
@@ -92,8 +86,9 @@ int vec_fill_with_integer(struct Vec *vec, int val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    for (size_t i = 0; i < vec->n; i++) {
-        vec->ivals[i] = val;
+    int *ival = (int *)arena_get_ptr(&vec->val);
+    for (int i = 0; i < vec->n; i++) {
+        ival[i] = val;
     }
 
     return RC_OK;
@@ -103,7 +98,7 @@ inline int vec_size(const struct Vec *vec) {
     return vec ? (int)vec->n : RC_FAIL;
 }
 
-inline int vec_set_real_item(struct Vec *vec, size_t idx, double val) {
+inline int vec_set_real_item(struct Vec *vec, int idx, double val) {
     if (!vec) {
         rc_set_err_msg("Invalid NULL argument(s) provided to vec_set_real_item");
         return RC_INVALID_ARG_ERR;
@@ -114,17 +109,18 @@ inline int vec_set_real_item(struct Vec *vec, size_t idx, double val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    if (idx >= vec->n) {
-        rc_set_err_msg("Index out of bounds in vec_set_real_item (%zu >= %zu)", idx, vec->n);
+    if (idx >= vec->n || idx < 0) {
+        rc_set_err_msg("Index out of bounds in vec_set_real_item (%d >= %d)", idx, vec->n);
         return RC_IDX_OUT_OF_BOUNDS_ERR;
     }
 
-    vec->dvals[idx] = val;
+    double *dval = (double *)arena_get_ptr(&vec->val);
+    dval[idx] = val;
 
     return RC_OK;
 }
 
-inline int vec_set_integer_item(struct Vec *vec, size_t idx, int val) {
+inline int vec_set_integer_item(struct Vec *vec, int idx, int val) {
     if (!vec) {
         rc_set_err_msg("Invalid NULL argument(s) provided to vec_set_integer_item");
         return RC_INVALID_ARG_ERR;
@@ -135,17 +131,18 @@ inline int vec_set_integer_item(struct Vec *vec, size_t idx, int val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    if (idx >= vec->n) {
-        rc_set_err_msg("Index out of bounds in vec_set_integer_item (%zu >= %zu)", idx, vec->n);
+    if (idx >= vec->n || idx < 0) {
+        rc_set_err_msg("Index out of bounds in vec_set_integer_item (%d >= %d)", idx, vec->n);
         return RC_IDX_OUT_OF_BOUNDS_ERR;
     }
 
-    vec->ivals[idx] = val;
+    int *ival = (int *)arena_get_ptr(&vec->val);
+    ival[idx] = val;
 
     return RC_OK;
 }
 
-inline int vec_get_real_item(const struct Vec *vec, size_t idx, double *val) {
+inline int vec_get_real_item(const struct Vec *vec, int idx, double *val) {
     if (!vec || !val) {
         rc_set_err_msg("Invalid NULL argument(s) provided to vec_get_real_item");
         return RC_INVALID_ARG_ERR;
@@ -156,12 +153,18 @@ inline int vec_get_real_item(const struct Vec *vec, size_t idx, double *val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    *val = vec->dvals[idx];
+    if (idx >= vec->n || idx < 0) {
+        rc_set_err_msg("Index out of bounds in vec_get_real_item (%d >= %d)", idx, vec->n);
+        return RC_IDX_OUT_OF_BOUNDS_ERR;
+    }
+
+    double *dval = (double *)arena_get_ptr(&vec->val);
+    *val = dval[idx];
 
     return RC_OK;
 }
 
-inline int vec_get_integer_item(const struct Vec *vec, size_t idx, int *val) {
+inline int vec_get_integer_item(const struct Vec *vec, int idx, int *val) {
     if (!vec || !val) {
         rc_set_err_msg("Invalid NULL argument(s) provided to vec_get_integer_item");
         return RC_INVALID_ARG_ERR;
@@ -172,7 +175,13 @@ inline int vec_get_integer_item(const struct Vec *vec, size_t idx, int *val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    *val = vec->ivals[idx];
+    if (idx >= vec->n || idx < 0) {
+        rc_set_err_msg("Index out of bounds in vec_get_integer_item (%d >= %d)", idx, vec->n);
+        return RC_IDX_OUT_OF_BOUNDS_ERR;
+    }
+
+    int *ival = (int *)arena_get_ptr(&vec->val);
+    *val = ival[idx];
 
     return RC_OK;
 }

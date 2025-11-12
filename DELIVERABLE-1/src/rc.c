@@ -13,7 +13,7 @@ int rc_set_err_msg(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    bzero(rc_err_msg, RC_ERR_MSG_LEN);
+    memset(rc_err_msg, 0U, RC_ERR_MSG_LEN);
     int len = vsnprintf(rc_err_msg, RC_ERR_MSG_LEN, fmt, args);
 
     va_end(args);

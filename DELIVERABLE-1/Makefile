@@ -27,30 +27,30 @@ $(BUILD_DIR):
 	@mkdir -p $@
 
 $(TARGET): $(OBJECTS)
-	@echo  "$(BLUE)>>>$(RESET) Linking executable: $(EXEC_NAME)"
-	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) && echo "$(GREEN)Build successful!$(RESET)" || (echo "$(RED)Build failed!$(RESET)" && exit 1)
+	@printf "$(BLUE)>>>$(RESET) Linking executable: $(EXEC_NAME)\n"
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) && printf "$(GREEN)Build successful!$(RESET)\n" || (printf "$(RED)Build failed!$(RESET)\n" && exit 1)
 
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	@echo  "$(BLUE)>>>$(RESET) Compiling $<"
+	@printf "$(BLUE)>>>$(RESET) Compiling $<\n"
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 deps:
-	@echo  "$(BLUE)>>>$(RESET) Building dependencies..."
-	@echo "$(BLUE)>>>$(RESET) Building lib/arena..."
+	@printf "$(BLUE)>>>$(RESET) Building dependencies...\n"
+	@printf "$(BLUE)>>>$(RESET) Building lib/arena...\n"
 	@$(MAKE) -C lib/arena
-	@echo "$(GREEN)Dependencies built successfully!$(RESET)"
+	@printf "$(GREEN)Dependencies built successfully!$(RESET)\n"
 
 
 clean:
-	@echo  "$(BLUE)>>>$(RESET) Cleaning build artifacts..."
+	@printf  "$(BLUE)>>>$(RESET) Cleaning build artifacts...\n"
 	@rm -rf $(BUILD_DIR)
 
 help:
-	@echo ""
-	@echo "$(YELLOW)Available targets:$(RESET)"
-	@echo "  $(GREEN)make$(RESET)          	- Build the project"
-	@echo "  $(GREEN)make deps$(RESET)		- Build the dependencies"
-	@echo "  $(GREEN)make clean$(RESET)     - Remove build artifacts"
-	@echo "  $(GREEN)make help$(RESET)      - Show this help message"
-	@echo ""
+	@printf "\n"
+	@printf "$(YELLOW)Available targets:$(RESET)\n"
+	@printf "  $(GREEN)make$(RESET)          	- Build the project\n"
+	@printf "  $(GREEN)make deps$(RESET)		- Build the dependencies\n"
+	@printf "  $(GREEN)make clean$(RESET)     - Remove build artifacts\n"
+	@printf "  $(GREEN)make help$(RESET)      - Show this help message\n"
+	@printf "\n"

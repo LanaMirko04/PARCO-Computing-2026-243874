@@ -17,6 +17,10 @@
 #include "rc.h"
 #include "arena.h"
 #include "vec.h"
+#include "mmio.h"
+
+#include <string.h>
+#include <errno.h>
 
 /*! Unused function warning suppression */
 static int prv_coo_matrix_mul_vec_serial(const struct CooMatrix *mtx, const struct Vec *vec, struct Vec *result) __attribute__((unused));
@@ -36,7 +40,7 @@ static int prv_coo_matrix_mul_vec_pthreads(const struct CooMatrix *mtx, const st
  *                   - RC_INVALID_ARGUMENT_ERR if any argument is invalid.
  *                   - RC_MEM_ALLOC_ERR if memory allocation fails.
  */
-int prv_coo_matrix_init(struct CooMatrix *mtx, size_t m, size_t n, size_t nz, bool is_real, struct ArenaHandler *arena) {
+static int prv_coo_matrix_init(struct CooMatrix *mtx, int m, int n, int nz, bool is_real, struct ArenaHandler *arena) {
     if (!mtx || !arena) {
         rc_set_err_msg("Invalid NULL argument(s) provided to prv_coo_matrix_init");
         return RC_INVALID_ARG_ERR;
@@ -47,13 +51,51 @@ int prv_coo_matrix_init(struct CooMatrix *mtx, size_t m, size_t n, size_t nz, bo
     mtx->nz = nz;
     mtx->is_real = is_real;
 
-    mtx->items = arena_calloc(arena, sizeof(struct CooItem), nz);
-    if (!mtx->items) {
-        rc_set_err_msg("Memory allocation failed in prv_coo_matrix_init");
+    enum ArenaReturnCode res = arena_calloc(arena, sizeof(int), nz, &mtx->col);
+    if (res != ARENA_RC_OK) {
+        rc_set_err_msg("Memory array allocation failed in prv_coo_matrix_init [%s:%d]", __FILE__, __LINE__);
         return RC_MEM_ALLOC_ERR;
     }
 
+    res = arena_calloc(arena, sizeof(int), nz, &mtx->row);
+    if (res != ARENA_RC_OK) {
+        rc_set_err_msg("Memory array allocation failed in prv_coo_matrix_init [%s:%d]", __FILE__, __LINE__);
+        return RC_MEM_ALLOC_ERR;
+    }
+
+    res = arena_calloc(arena, is_real ? sizeof(double) : sizeof(int), nz, &mtx->row);
+    if (res != ARENA_RC_OK) {
+        rc_set_err_msg("Memory array allocation failed in prv_coo_matrix_init [%s:%d]", __FILE__, __LINE__);
+        return RC_MEM_ALLOC_ERR;
+    }
+
+    // mtx->col = arena_calloc(arena, sizeof(int), nz);
+    // mtx->row = arena_calloc(arena, sizeof(int), nz);
+    // void *val = NULL;
+    // if (is_real)
+    //     val = mtx->dval = arena_calloc(arena, sizeof(double), nz);
+    // else
+    //     val = mtx->ival = arena_calloc(arena, sizeof(int), nz);
+    //
+    // if (!mtx->col || mtx->row || !val) {
+    //     rc_set_err_msg("Memory allocation failed in prv_coo_matrix_init");
+    //     return RC_MEM_ALLOC_ERR;
+    // }
+
     return RC_OK;
+}
+
+/*!
+ * \brief           Check if a Matrix Market typecode represents a valid sparse
+ *                  matrix of integers or reals.
+ *
+ * \param           matcode: The Matrix Market typecode to be checked.
+ * \return          true if is valid, false otherwise.
+ */
+static inline bool prv_coo_is_valid_sparse_matrix(MM_typecode matcode) {
+    return mm_is_matrix(matcode) &&
+           mm_is_sparse(matcode) &&
+           (mm_is_real(matcode) || mm_is_integer(matcode));
 }
 
 /*!
@@ -63,7 +105,7 @@ int prv_coo_matrix_init(struct CooMatrix *mtx, size_t m, size_t n, size_t nz, bo
  * \param[in]       vec: Pointer to the vector.
  * \return          true if compatible, false otherwise.
  */
-inline bool prv_coo_matrix_is_compatible_with_vec(const struct CooMatrix *mtx, const struct Vec *vec) {
+static inline bool prv_coo_matrix_is_compatible_with_vec(const struct CooMatrix *mtx, const struct Vec *vec) {
     if (!mtx || !vec)
         return false;
 
@@ -121,8 +163,52 @@ int coo_matrix_load_from_file(struct CooMatrix *mtx, const char *filename, struc
         return RC_INVALID_ARG_ERR;
     }
 
-    /*! TODO: use mmio.h to load the sparse matrix */
+    MM_typecode matcode;
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        rc_set_err_msg("Invalid file name provided to fopen - %s", strerror(errno));
+        return RC_FILE_IO_ERR;
+    }
 
+    int res = mm_read_banner(fp, &matcode);
+    if (res != RC_OK) {
+        fclose(fp);
+        rc_set_err_msg("Could not process Matrix Market banner");
+        return RC_FILE_INVALID_FMT_ERR;
+    }
+
+    if (!prv_coo_is_valid_sparse_matrix(matcode)) {
+        fclose(fp);
+        rc_set_err_msg("Market Matrix type [%s] not supported", mm_typecode_to_str(matcode));
+        return RC_FILE_INVALID_FMT_ERR;
+    }
+
+    int m, n, nz;
+    res = mm_read_mtx_crd_size(fp, &m, &n, &nz);
+    if (res != RC_OK) {
+        fclose(fp);
+        rc_set_err_msg("An error occurred while reading Matrix Market file");
+        return RC_FILE_INVALID_FMT_ERR;
+    }
+
+    res = prv_coo_matrix_init(mtx, m, n, nz, mm_is_real(matcode), arena);
+    if (res != RC_OK) {
+        fclose(fp);
+        return res; /*! Error message was inside the prv_coo_matrix_init */
+    }
+
+    int *col = (int *)arena_get_ptr(&mtx->col);
+    int *row = (int *)arena_get_ptr(&mtx->row);
+    void *val = arena_get_ptr(&mtx->val);
+    for (int i = 0; i < nz; ++i) {
+        fscanf(fp, "%d %d", &col[i], &row[i]);
+        if (mtx->is_real)
+            fscanf(fp, "%lg", &((double *)val)[i]);
+        else
+            fscanf(fp, "%d", &((int *)val)[i]);
+    }
+
+    fclose(fp);
     return RC_OK;
 }
 
