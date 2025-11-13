@@ -69,19 +69,6 @@ static int prv_coo_matrix_init(struct CooMatrix *mtx, int m, int n, int nz, bool
         return RC_MEM_ALLOC_ERR;
     }
 
-    // mtx->col = arena_calloc(arena, sizeof(int), nz);
-    // mtx->row = arena_calloc(arena, sizeof(int), nz);
-    // void *val = NULL;
-    // if (is_real)
-    //     val = mtx->dval = arena_calloc(arena, sizeof(double), nz);
-    // else
-    //     val = mtx->ival = arena_calloc(arena, sizeof(int), nz);
-    //
-    // if (!mtx->col || mtx->row || !val) {
-    //     rc_set_err_msg("Memory allocation failed in prv_coo_matrix_init");
-    //     return RC_MEM_ALLOC_ERR;
-    // }
-
     return RC_OK;
 }
 
