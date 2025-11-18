@@ -21,18 +21,6 @@
 #include <stdbool.h>
 
 /*!
- * \brief           Structure representing a single non-zero item in a COO matrix.
- */
-// struct CooItem {
-//     int col; /*< Column index of the non-zero item */
-//     int row; /*< Row index of the non-zero item */
-//     union {
-//         double dval; /*< Value of the non-zero real item */
-//         int ival;    /*< Value of the non-zero integer item */
-//     };
-// };
-
-/*!
  * \brief           Structure representing a sparse matrix in COO format.
  */
 struct CooMatrix {

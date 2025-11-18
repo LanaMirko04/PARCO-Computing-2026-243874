@@ -1,3 +1,6 @@
 [submodule "DELIVERABLE-1/lib/arena"]
 	path = DELIVERABLE-1/lib/arena
 	url = git@github.com:LanaMirko04/libarena.git
+[submodule "DELIVERABLE-1/lib/slog"]
+	path = DELIVERABLE-1/lib/slog
+	url = git@github.com:LanaMirko04/libslog

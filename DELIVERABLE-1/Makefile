@@ -1,8 +1,8 @@
 CC       := gcc
-CFLAGS   := -std=c11 -Wall -Wextra -Werror -O2 -Iinclude
+CFLAGS   := -std=c11 -Wall -Wextra -Werror -O2 -Iinclude -g
 # Add dependencies
-CFLAGS += -Ilib/arena/include
-LDFLAGS  := -Llib/arena/build -larena
+CFLAGS += -Ilib/arena/include -Ilib/slog/include
+LDFLAGS  := -Llib/arena/build -Llib/slog/build -larena -lslog
 
 SRC_DIR   := src
 BUILD_DIR := build
@@ -39,6 +39,8 @@ deps:
 	@printf "$(BLUE)>>>$(RESET) Building dependencies...\n"
 	@printf "$(BLUE)>>>$(RESET) Building lib/arena...\n"
 	@$(MAKE) -C lib/arena
+	@printf "$(BLUE)>>>$(RESET) Building lib/slog...\n"
+	@$(MAKE) -C lib/slog
 	@printf "$(GREEN)Dependencies built successfully!$(RESET)\n"
 
 

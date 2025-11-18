@@ -1,3 +1,10 @@
+/*!
+ * \file            rc.c
+ * \date            2025-10-00
+ * \author          Mirko Lana [lana.mirko@icloud.com]
+ *
+ * \brief           Implementation of return code and error message handling.
+ */
 #include "rc.h"
 
 #include <stdio.h>

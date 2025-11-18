@@ -18,6 +18,7 @@
 #include "arena.h"
 #include "vec.h"
 #include "mmio.h"
+#include "utils.h"
 
 #include <string.h>
 #include <errno.h>
@@ -63,7 +64,7 @@ static int prv_coo_matrix_init(struct CooMatrix *mtx, int m, int n, int nz, bool
         return RC_MEM_ALLOC_ERR;
     }
 
-    res = arena_calloc(arena, is_real ? sizeof(double) : sizeof(int), nz, &mtx->row);
+    res = arena_calloc(arena, is_real ? sizeof(double) : sizeof(int), nz, &mtx->val);
     if (res != ARENA_RC_OK) {
         rc_set_err_msg("Memory array allocation failed in prv_coo_matrix_init [%s:%d]", __FILE__, __LINE__);
         return RC_MEM_ALLOC_ERR;
@@ -108,9 +109,9 @@ static inline bool prv_coo_matrix_is_compatible_with_vec(const struct CooMatrix 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_coo_matrix_mul_vec_serial(const struct CooMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    (void)mtx;
-    (void)vec;
-    (void)result;
+    UNUSED(mtx);
+    UNUSED(vec);
+    UNUSED(result);
     return RC_OK;
 }
 
@@ -123,9 +124,9 @@ static int prv_coo_matrix_mul_vec_serial(const struct CooMatrix *mtx, const stru
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_coo_matrix_mul_vec_omp(const struct CooMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    (void)mtx;
-    (void)vec;
-    (void)result;
+    UNUSED(mtx);
+    UNUSED(vec);
+    UNUSED(result);
     return RC_OK;
 }
 
@@ -138,9 +139,9 @@ static int prv_coo_matrix_mul_vec_omp(const struct CooMatrix *mtx, const struct 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_coo_matrix_mul_vec_pthreads(const struct CooMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    (void)mtx;
-    (void)vec;
-    (void)result;
+    UNUSED(mtx);
+    UNUSED(vec);
+    UNUSED(result);
     return RC_OK;
 }
 

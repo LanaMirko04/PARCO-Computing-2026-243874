@@ -12,11 +12,13 @@
  *                  that the arena is properly initialized and destroyed.
  */
 
+#include "config.h"
 #include "csr.h"
 #include "rc.h"
 #include "arena.h"
 #include "coo.h"
 #include "vec.h"
+#include "utils.h"
 
 #include <stdbool.h>
 
@@ -48,9 +50,9 @@ static inline bool prv_csr_matrix_is_compatible_with_vec(const struct CsrMatrix 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    (void)mtx;
-    (void)vec;
-    (void)result;
+    UNUSED(mtx);
+    UNUSED(vec);
+    UNUSED(result);
     return RC_OK;
 }
 
@@ -63,9 +65,9 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    (void)mtx;
-    (void)vec;
-    (void)result;
+    UNUSED(mtx);
+    UNUSED(vec);
+    UNUSED(result);
     return RC_OK;
 }
 
@@ -78,9 +80,9 @@ static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_pthreads(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    (void)mtx;
-    (void)vec;
-    (void)result;
+    UNUSED(mtx);
+    UNUSED(vec);
+    UNUSED(result);
     return RC_OK;
 }
 
@@ -97,15 +99,15 @@ int csr_matrix_from_coo(struct CsrMatrix *dest, const struct CooMatrix *src, str
 
     enum ArenaReturnCode res = arena_calloc(arena, sizeof(int), dest->m + 1, &dest->row);
     if (res != ARENA_RC_OK) {
-        rc_set_err_msg("Memory array allocation failed in csr_matrix_from_coo[%s:%d]", __FILE__, __LINE__);
+        rc_set_err_msg("Memory array allocation failed in csr_matrix_from_coo");
         return RC_MEM_ALLOC_ERR;
     }
 
     int *coo_row = arena_get_ptr(&src->row);
-    int *csr_row = arena_get_ptr(&src->row);
+    int *csr_row = arena_get_ptr(&dest->row);
     int i = 0;
 
-    for (; i < dest->nz; ++i)
+    for (; i < src->nz; ++i)
         csr_row[coo_row[i] + 1]++;
 
     for (i = 0; i < dest->m; ++i)

@@ -27,4 +27,11 @@
  */
 #define RAND_DOUBLE(min, max) (((double)rand() / RAND_MAX) * ((max) - (min)) + (min))
 
+/*!
+ * \brief           Suppress unused variable warnings.
+ *
+ * \param[in]       x: Variable to mark as unused.
+ */
+#define UNUSED(x) (void)(x)
+
 #endif /*! UTILS_H */
