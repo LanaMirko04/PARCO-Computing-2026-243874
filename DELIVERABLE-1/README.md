@@ -19,10 +19,16 @@
 
 **Bonus**: try to optimise the code by exploring the scientific papers.
 
-## Project structure
+## How to run and compile
+To compile the code, run the following command in the terminal:
 
-_TODO_
+```shell
+$ make deps
+$ make
+```
 
-## How to run
+To run the code, use the following command:
 
-_TODO_
+```shell
+$ ./build/pgm # TODO: define CLI options
+```
