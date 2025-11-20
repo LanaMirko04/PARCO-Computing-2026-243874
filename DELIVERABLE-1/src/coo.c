@@ -185,11 +185,13 @@ int coo_matrix_load_from_file(struct CooMatrix *mtx, const char *filename, struc
         return res; /*! Error message was inside the prv_coo_matrix_init */
     }
 
-    int *col = (int *)arena_get_ptr(&mtx->col);
-    int *row = (int *)arena_get_ptr(&mtx->row);
+    int *row = arena_get_ptr(&mtx->row);
+    int *col = arena_get_ptr(&mtx->col);
     void *val = arena_get_ptr(&mtx->val);
     for (int i = 0; i < nz; ++i) {
-        fscanf(fp, "%d %d", &col[i], &row[i]);
+        fscanf(fp, "%d %d", &row[i], &col[i]);
+        row[i]--;
+        col[i]--;
         if (mtx->is_real)
             fscanf(fp, "%lg", &((double *)val)[i]);
         else

@@ -34,15 +34,15 @@ struct BenchHandler {
 static struct BenchHandler g_bench_handler; /*!< Global benchmark handler. */
 
 /*!
- * \brief           Get current time in milliseconds.
+ * \brief           Get current time in microseconds.
  *
- * \return          Current time in milliseconds.
+ * \return          Current time in microseconds.
  */
-static inline uint64_t prv_bench_get_ms(void) {
-    SLOG_DEBUG("Entering pev_bench_get_ms");
+static inline uint64_t prv_bench_get_us(void) {
+    SLOG_DEBUG("Entering prv_bench_get_us");
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000ULL + (uint64_t)(ts.tv_nsec / 1000000ULL);
+    return (uint64_t)ts.tv_sec * 1000000U + (uint64_t)(ts.tv_nsec / 1000U);
 }
 
 /*!
@@ -85,7 +85,7 @@ int bench_init(const struct BenchConfig *cfg) {
     SLOG_DEBUG("Martix loaded: rows=%d, cols=%d, non-zero=%d", g_bench_handler.mtx.m, g_bench_handler.mtx.n, g_bench_handler.mtx.nz);
 
     SLOG_DEBUG("Initializing input vector of size: %d", g_bench_handler.mtx.n);
-    res = vec_init(&g_bench_handler.vec, g_bench_handler.mtx.m, g_bench_handler.mtx.is_real, cfg->arena);
+    res = vec_init(&g_bench_handler.vec, g_bench_handler.mtx.n, g_bench_handler.mtx.is_real, cfg->arena);
     if (res != RC_OK)
         return res;
     SLOG_DEBUG("Input vector initialized");
@@ -150,15 +150,15 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
 
     uint64_t *samples = arena_get_ptr(&results->samples);
     for (int i = 0; i < g_bench_handler.runs; ++i) {
-        uint64_t start = prv_bench_get_ms();
+        uint64_t start = prv_bench_get_us();
 
         int res = csr_matrix_mul_vec(&g_bench_handler.mtx, &g_bench_handler.vec, &g_bench_handler.result);
         if (res != RC_OK)
             return res;
 
-        uint64_t end = prv_bench_get_ms();
+        uint64_t end = prv_bench_get_us();
 
-        SLOG_DEBUG("Run %d completed in %llu ms", i + 1, (end - start));
+        SLOG_DEBUG("Run %d completed in %llu us", i + 1, (end - start));
 
         /*! Update benchmark results. */
         samples[i] = end - start;
@@ -170,7 +170,7 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
     results->mean /= (uint64_t)g_bench_handler.runs;
     results->stddev = prv_bench_compute_stddev(samples, g_bench_handler.runs, results->mean);
 
-    SLOG_DEBUG("Benchmark completed: mean=%llu ms, stddev=%llu ms, min=%llu ms, max=%llu ms",
+    SLOG_DEBUG("Benchmark completed: mean=%llu us, stddev=%llu us, min=%llu us, max=%llu us",
                results->mean,
                results->stddev,
                results->min,
