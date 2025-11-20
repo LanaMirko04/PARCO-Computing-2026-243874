@@ -40,6 +40,16 @@ int main(int argc, char *argv[]) {
         return res;
     }
 
+    struct BenchResults bench_results;
+
+    res = bench_run(&bench_results, &g_arena_handler);
+    if (res != RC_OK) {
+        SLOG_ERROR("%s", rc_get_err_msg());
+        return res;
+    }
+
+    bench_save_result(&bench_results, "bench_results.json");
+
     return EXIT_SUCCESS;
 }
 
@@ -68,7 +78,7 @@ static int init(void) {
     const struct BenchConfig bench_cfg = {
         .filename = filename,
         .warmup_iters = 0,
-        .runs = 0,
+        .runs = 10,
         .arena = &g_arena_handler,
     };
 
