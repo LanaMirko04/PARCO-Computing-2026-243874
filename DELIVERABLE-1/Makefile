@@ -1,8 +1,8 @@
 CC       := gcc
-CFLAGS   := -std=c11 -Wall -Wextra -Werror -O2 -Iinclude -g
+CFLAGS   := -std=c11 -Wall -Wextra -Werror -O2 -Iinclude
 # Add dependencies
 CFLAGS += -Ilib/arena/include -Ilib/slog/include
-LDFLAGS  := -Llib/arena/build -Llib/slog/build -larena -lslog
+LDFLAGS  := -lm -Llib/arena/build -Llib/slog/build -larena -lslog
 
 SRC_DIR   := src
 BUILD_DIR := build
