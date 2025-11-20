@@ -19,7 +19,9 @@
 #include "coo.h"
 #include "vec.h"
 #include "utils.h"
+#include "slog.h"
 
+#include <string.h>
 #include <stdbool.h>
 
 /*! Unused function warning suppression */
@@ -35,6 +37,7 @@ static int prv_csr_matrix_mul_vec_pthreads(const struct CsrMatrix *mtx, const st
  * \return          true if compatible, false otherwise.
  */
 static inline bool prv_csr_matrix_is_compatible_with_vec(const struct CsrMatrix *mtx, const struct Vec *vec) {
+    SLOG_DEBUG("Entering prv_csr_matrix_is_compatible_with_vec");
     if (!mtx || !vec)
         return false;
 
@@ -50,9 +53,45 @@ static inline bool prv_csr_matrix_is_compatible_with_vec(const struct CsrMatrix 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    UNUSED(mtx);
-    UNUSED(vec);
-    UNUSED(result);
+    SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_serial");
+    int *row = arena_get_ptr(&mtx->row);
+    int *col = arena_get_ptr(&mtx->col);
+
+    SLOG_DEBUG("Matrix dimensions: %d x %d, Non-zeros: %d", mtx->m, mtx->n, mtx->nz);
+    SLOG_DEBUG("Vector size: %d", vec_size(vec));
+    SLOG_DEBUG("Result vector size: %d", vec_size(result));
+
+    if (mtx->is_real) {
+        double *mtx_val = arena_get_ptr(&mtx->val);
+        double *vec_val = arena_get_ptr(&vec->val);
+        double *res_val = arena_get_ptr(&result->val);
+        for (int i = 0; i <= mtx->m - 1; ++i) {
+            double sum = 0.0;
+
+            for (int k = row[i]; k < row[i + 1]; ++k) {
+                sum += mtx_val[k] * vec_val[col[k]];
+                SLOG_DEBUG("mtx_val[%d] = %f, vec_val[%d] = %f, partial sum = %f", k, mtx_val[k], col[k], vec_val[col[k]], sum);
+            }
+
+            res_val[i] = sum;
+            SLOG_DEBUG("res_val[%d] = %f", i, res_val[i]);
+        }
+    } else {
+        int *mtx_val = arena_get_ptr(&mtx->val);
+        int *vec_val = arena_get_ptr(&vec->val);
+        int *res_val = arena_get_ptr(&result->val);
+        for (int i = 0; i <= mtx->m - 1; ++i) {
+            int sum = 0;
+
+            for (int k = row[i]; k < row[i + 1]; ++k) {
+                sum += mtx_val[k] * vec_val[col[k]];
+                SLOG_DEBUG("mtx_val[%d] = %d, vec_val[%d] = %d, partial sum = %d", k, mtx_val[k], col[k], vec_val[col[k]], sum);
+            }
+
+            res_val[i] = sum;
+            SLOG_DEBUG("res_val[%d] = %d", i, res_val[i]);
+        }
+    }
     return RC_OK;
 }
 
@@ -65,6 +104,7 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
+    SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_omp");
     UNUSED(mtx);
     UNUSED(vec);
     UNUSED(result);
@@ -80,6 +120,7 @@ static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_pthreads(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
+    SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_pthreads");
     UNUSED(mtx);
     UNUSED(vec);
     UNUSED(result);
@@ -87,6 +128,7 @@ static int prv_csr_matrix_mul_vec_pthreads(const struct CsrMatrix *mtx, const st
 }
 
 int csr_matrix_from_coo(struct CsrMatrix *dest, const struct CooMatrix *src, struct ArenaHandler *arena) {
+    SLOG_DEBUG("Entering csr_matrix_from_coo");
     if (!dest || !src || !arena)
         return RC_INVALID_ARG_ERR;
 
@@ -117,6 +159,7 @@ int csr_matrix_from_coo(struct CsrMatrix *dest, const struct CooMatrix *src, str
 }
 
 int csr_matrix_load_from_file(struct CsrMatrix *mtx, const char *filename, struct ArenaHandler *arena) {
+    SLOG_DEBUG("Entering csr_matrix_load_from_file");
     struct CooMatrix coo;
 
     int res = coo_matrix_load_from_file(&coo, filename, arena);
@@ -127,6 +170,7 @@ int csr_matrix_load_from_file(struct CsrMatrix *mtx, const char *filename, struc
 }
 
 int csr_matrix_mul_vec(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
+    SLOG_DEBUG("Entering csr_matrix_mul_vec");
     if (!mtx || !vec || !result) {
         rc_set_err_msg("Invalid NULL argument(s) provided to coo_matrix_mul_vec");
         return RC_INVALID_ARG_ERR;
