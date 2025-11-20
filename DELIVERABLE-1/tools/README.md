@@ -9,8 +9,6 @@ The first thing you need to do is to create a virtual environment and install th
 $ python -m venv .venv
 $ source .venv/bin/activate  # If you are using fish shell use: source .venv/bin/activate.fish
 $ pip install -r tools/requirements.txt
-
-tools/
 ```
 
 Once the dependencies are installed, you can run any of the scripts in this directory using Python. For example, to run the matrix generator script, you would execute:
