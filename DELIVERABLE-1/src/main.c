@@ -10,29 +10,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
+#include "config.h"
 #include "arena.h"
 #include "rc.h"
-// #define SLOG_DISABLE_LOGGING_SYSTEM /*! Uncomment to disable the logging system */
 #include "slog.h"
 // #include "utils.h"
 #include "bench.h"
 
 static struct ArenaHandler g_arena_handler;
-static char *filename;
+#ifdef CONFIG_ENABLE_OMP_PARALLELISM
+static omp_lock_t g_omp_lock;
+#endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
 
 static void enter_cs(void);
 static void exit_cs(void);
-static int init(void);
+static int init(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        puts("Usage: pgm <filename>");
-        return EXIT_FAILURE;
-    }
-
-    filename = argv[1];
-    assert(!init()); /*! Terminate if initialization fails. */
+    assert(!init(argc, argv)); /*! Terminate if initialization fails. */
 
     int res = bench_warmup();
     if (res != RC_OK) {
@@ -54,12 +51,27 @@ int main(int argc, char *argv[]) {
 }
 
 static void enter_cs(void) {
+#ifdef CONFIG_ENABLE_OMP_PARALLELISM
+    omp_set_lock(&g_omp_lock);
+#endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
 }
 
 static void exit_cs(void) {
+#ifdef CONFIG_ENABLE_OMP_PARALLELISM
+    omp_unset_lock(&g_omp_lock);
+#endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
 }
 
-static int init(void) {
+static int init(int argc, char *argv[]) {
+    if (argc < 2) {
+        puts("Usage: ./pgm path/to/file.mtx");
+        return RC_FAIL;
+    }
+
+#ifdef CONFIG_ENABLE_OMP_PARALLELISM
+    omp_init_lock(&g_omp_lock);
+#endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
+
     const struct SlogConfig slog_cfg = {
         .default_logger = SLOG_INIT_DEFAULT_LOGGER,
         .enter_cs = enter_cs,
@@ -76,8 +88,8 @@ static int init(void) {
     }
 
     const struct BenchConfig bench_cfg = {
-        .filename = filename,
-        .warmup_iters = 0,
+        .filename = argv[1],
+        .warmup_iters = 4,
         .runs = 10,
         .arena = &g_arena_handler,
     };

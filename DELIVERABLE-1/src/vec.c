@@ -67,7 +67,7 @@ int vel_fill_with_real(struct Vec *vec, double val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    double *dval = (double *)arena_get_ptr(&vec->val);
+    double *dval = arena_get_ptr(&vec->val);
     for (int i = 0; i < vec->n; i++) {
         dval[i] = val;
     }
@@ -86,7 +86,7 @@ int vec_fill_with_integer(struct Vec *vec, int val) {
         return RC_INVALID_ARG_ERR;
     }
 
-    int *ival = (int *)arena_get_ptr(&vec->val);
+    int *ival = arena_get_ptr(&vec->val);
     for (int i = 0; i < vec->n; i++) {
         ival[i] = val;
     }
@@ -95,7 +95,7 @@ int vec_fill_with_integer(struct Vec *vec, int val) {
 }
 
 inline int vec_size(const struct Vec *vec) {
-    return vec ? (int)vec->n : RC_FAIL;
+    return vec ? vec->n : RC_FAIL;
 }
 
 inline int vec_set_real_item(struct Vec *vec, int idx, double val) {
@@ -114,7 +114,7 @@ inline int vec_set_real_item(struct Vec *vec, int idx, double val) {
         return RC_IDX_OUT_OF_BOUNDS_ERR;
     }
 
-    double *dval = (double *)arena_get_ptr(&vec->val);
+    double *dval = arena_get_ptr(&vec->val);
     dval[idx] = val;
 
     return RC_OK;
@@ -136,7 +136,7 @@ inline int vec_set_integer_item(struct Vec *vec, int idx, int val) {
         return RC_IDX_OUT_OF_BOUNDS_ERR;
     }
 
-    int *ival = (int *)arena_get_ptr(&vec->val);
+    int *ival = arena_get_ptr(&vec->val);
     ival[idx] = val;
 
     return RC_OK;
@@ -158,7 +158,7 @@ inline int vec_get_real_item(const struct Vec *vec, int idx, double *val) {
         return RC_IDX_OUT_OF_BOUNDS_ERR;
     }
 
-    double *dval = (double *)arena_get_ptr(&vec->val);
+    double *dval = arena_get_ptr(&vec->val);
     *val = dval[idx];
 
     return RC_OK;
@@ -180,7 +180,7 @@ inline int vec_get_integer_item(const struct Vec *vec, int idx, int *val) {
         return RC_IDX_OUT_OF_BOUNDS_ERR;
     }
 
-    int *ival = (int *)arena_get_ptr(&vec->val);
+    int *ival = arena_get_ptr(&vec->val);
     *val = ival[idx];
 
     return RC_OK;

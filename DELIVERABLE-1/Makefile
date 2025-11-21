@@ -1,8 +1,15 @@
 CC       := gcc
-CFLAGS   := -std=c11 -Wall -Wextra -Werror -O2 -Iinclude
+CFLAGS   := -std=c11 -Wall -Wextra -Werror -O3 -Iinclude
+# CFLAGS   := -std=c11 -g -Wall -Wextra -Werror -O0 -Iinclude
+
 # Add dependencies
 CFLAGS += -Ilib/arena/include -Ilib/slog/include
 LDFLAGS  := -lm -Llib/arena/build -Llib/slog/build -larena -lslog
+
+ifeq ($(shell uname), Darwin)
+	CFLAGS += -Xpreprocessor -I/opt/homebrew/opt/libomp/include
+	LDFLAGS += -L/opt/homebrew/opt/libomp/lib -lomp
+endif
 
 SRC_DIR   := src
 BUILD_DIR := build
