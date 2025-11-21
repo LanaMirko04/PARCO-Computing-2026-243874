@@ -26,9 +26,11 @@
  * @{
  */
 
-#define CONFIG_ENABLE_SERIAL_EXECUTION /*! Enable serial execution mode */
-// #define CONFIG_ENABLE_OMP_PARALLELISM /*! Enable OpenMP parallelism */
+// #define CONFIG_ENABLE_SERIAL_EXECUTION /*! Enable serial execution mode */
+#define CONFIG_ENABLE_OMP_PARALLELISM /*! Enable OpenMP parallelism */
 // #define CONFIG_ENABLE_PTHREADS_PARALLELISM /*! Enable Pthreads parallelism */
+#define CONFIG_NUM_THREADS 12
+#define CONFIG_OMP_SCHEDULE guided
 
 /*!
   * @}

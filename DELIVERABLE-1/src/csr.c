@@ -57,9 +57,9 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
     int *row = arena_get_ptr(&mtx->row);
     int *col = arena_get_ptr(&mtx->col);
 
-    SLOG_DEBUG("Matrix dimensions: %d x %d, Non-zeros: %d", mtx->m, mtx->n, mtx->nz);
-    SLOG_DEBUG("Vector size: %d", vec_size(vec));
-    SLOG_DEBUG("Result vector size: %d", vec_size(result));
+    // SLOG_DEBUG("Matrix dimensions: %d x %d, Non-zeros: %d", mtx->m, mtx->n, mtx->nz);
+    // SLOG_DEBUG("Vector size: %d", vec_size(vec));
+    // SLOG_DEBUG("Result vector size: %d", vec_size(result));
 
     if (mtx->is_real) {
         double *mtx_val = arena_get_ptr(&mtx->val);
@@ -70,11 +70,11 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
 
             for (int k = row[i]; k < row[i + 1]; ++k) {
                 sum += mtx_val[k] * vec_val[col[k]];
-                SLOG_DEBUG("mtx_val[%d] = %f, vec_val[%d] = %f, partial sum = %f", k, mtx_val[k], col[k], vec_val[col[k]], sum);
+                // SLOG_DEBUG("mtx_val[%d] = %f, vec_val[%d] = %f, partial sum = %f", k, mtx_val[k], col[k], vec_val[col[k]], sum);
             }
 
             res_val[i] = sum;
-            SLOG_DEBUG("res_val[%d] = %f", i, res_val[i]);
+            // SLOG_DEBUG("res_val[%d] = %f", i, res_val[i]);
         }
     } else {
         int *mtx_val = arena_get_ptr(&mtx->val);
@@ -85,11 +85,11 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
 
             for (int k = row[i]; k < row[i + 1]; ++k) {
                 sum += mtx_val[k] * vec_val[col[k]];
-                SLOG_DEBUG("mtx_val[%d] = %d, vec_val[%d] = %d, partial sum = %d", k, mtx_val[k], col[k], vec_val[col[k]], sum);
+                // SLOG_DEBUG("mtx_val[%d] = %d, vec_val[%d] = %d, partial sum = %d", k, mtx_val[k], col[k], vec_val[col[k]], sum);
             }
 
             res_val[i] = sum;
-            SLOG_DEBUG("res_val[%d] = %d", i, res_val[i]);
+            // SLOG_DEBUG("res_val[%d] = %d", i, res_val[i]);
         }
     }
     return RC_OK;
@@ -105,9 +105,40 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
  */
 static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
     SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_omp");
-    UNUSED(mtx);
-    UNUSED(vec);
-    UNUSED(result);
+    int *row = arena_get_ptr(&mtx->row);
+    int *col = arena_get_ptr(&mtx->col);
+
+    if (mtx->is_real) {
+        double *mtx_val = arena_get_ptr(&mtx->val);
+        double *vec_val = arena_get_ptr(&vec->val);
+        double *res_val = arena_get_ptr(&result->val);
+
+#pragma omp parallel for num_threads(CONFIG_NUM_THREADS) schedule(CONFIG_OMP_SCHEDULE)
+        for (int i = 0; i <= mtx->m - 1; ++i) {
+            double sum = 0.0;
+
+#pragma omp simd reduction(+ : sum)
+            for (int k = row[i]; k < row[i + 1]; ++k)
+                sum += mtx_val[k] * vec_val[col[k]];
+
+            res_val[i] = sum;
+        }
+    } else {
+        int *mtx_val = arena_get_ptr(&mtx->val);
+        int *vec_val = arena_get_ptr(&vec->val);
+        int *res_val = arena_get_ptr(&result->val);
+
+#pragma omp parallel for num_threads(CONFIG_NUM_THREADS) schedule(CONFIG_OMP_SCHEDULE)
+        for (int i = 0; i <= mtx->m - 1; ++i) {
+            int sum = 0;
+
+#pragma omp simd reduction(+ : sum)
+            for (int k = row[i]; k < row[i + 1]; ++k)
+                sum += mtx_val[k] * vec_val[col[k]];
+
+            res_val[i] = sum;
+        }
+    }
     return RC_OK;
 }
 
@@ -121,6 +152,7 @@ static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct 
  */
 static int prv_csr_matrix_mul_vec_pthreads(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
     SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_pthreads");
+    SLOG_DEBUG("Pthreads parallelism is not yet implemented for CSR matrix-vector multiplication.");
     UNUSED(mtx);
     UNUSED(vec);
     UNUSED(result);
