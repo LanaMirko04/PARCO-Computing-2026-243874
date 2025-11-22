@@ -163,7 +163,7 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
 
         uint64_t end = prv_bench_get_us();
 
-        SLOG_DEBUG("Run %d completed in %llu us", i + 1, (end - start));
+        SLOG_DEBUG("Run %d completed in %lu us", i + 1, (end - start));
 
         /*! Update benchmark results. */
         samples[i] = end - start;
@@ -175,7 +175,7 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
     results->mean /= (uint64_t)g_bench_handler.runs;
     results->stddev = prv_bench_compute_stddev(samples, g_bench_handler.runs, results->mean);
 
-    SLOG_INFO("Benchmark completed: mean=%llu us, stddev=%llu us, min=%llu us, max=%llu us",
+    SLOG_INFO("Benchmark completed: mean=%lu us, stddev=%lu us, min=%lu us, max=%lu us",
               results->mean,
               results->stddev,
               results->min,
@@ -204,9 +204,9 @@ int bench_save_result(const struct BenchResults *results, const char *filename) 
     int i = 0;
     uint64_t *samples = arena_get_ptr(&results->samples);
     for (; i < results->runs - 1; ++i)
-        fprintf(fp, "%llu, ", samples[i]);
+        fprintf(fp, "%lu, ", samples[i]);
 
-    fprintf(fp, "%llu],\n\t\"mean\": %llu,\n\t\"stddev\": %llu,\n\t\"min\": %llu,\n\t\"max\": %llu,\n}", samples[i], results->mean, results->stddev, results->min, results->max);
+    fprintf(fp, "%lu],\n\t\"mean\": %lu,\n\t\"stddev\": %lu,\n\t\"min\": %lu,\n\t\"max\": %lu,\n}", samples[i], results->mean, results->stddev, results->min, results->max);
     fclose(fp);
 
     return RC_OK;
