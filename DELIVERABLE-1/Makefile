@@ -9,6 +9,8 @@ LDFLAGS  := -lm -Llib/arena/build -Llib/slog/build -larena -lslog
 ifeq ($(shell uname), Darwin)
 	CFLAGS += -Xpreprocessor -I/opt/homebrew/opt/libomp/include
 	LDFLAGS += -L/opt/homebrew/opt/libomp/lib -lomp
+else
+	CFLAGS += -fopenmp
 endif
 
 SRC_DIR   := src

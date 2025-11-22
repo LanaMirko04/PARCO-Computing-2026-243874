@@ -113,7 +113,7 @@ static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct 
         double *vec_val = arena_get_ptr(&vec->val);
         double *res_val = arena_get_ptr(&result->val);
 
-#pragma omp parallel for num_threads(CONFIG_NUM_THREADS) schedule(CONFIG_OMP_SCHEDULE)
+#pragma omp parallel for schedule(CONFIG_OMP_SCHEDULE)
         for (int i = 0; i <= mtx->m - 1; ++i) {
             double sum = 0.0;
 
@@ -128,7 +128,7 @@ static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct 
         int *vec_val = arena_get_ptr(&vec->val);
         int *res_val = arena_get_ptr(&result->val);
 
-#pragma omp parallel for num_threads(CONFIG_NUM_THREADS) schedule(CONFIG_OMP_SCHEDULE)
+#pragma omp parallel for schedule(CONFIG_OMP_SCHEDULE)
         for (int i = 0; i <= mtx->m - 1; ++i) {
             int sum = 0;
 
