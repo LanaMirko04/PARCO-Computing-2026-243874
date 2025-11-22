@@ -118,6 +118,7 @@ int bench_init(const struct BenchConfig *cfg) {
 int bench_warmup(void) {
     SLOG_DEBUG("Entering bench_warmup");
 
+    SLOG_INFO("Starting warmup with %d iterations", g_bench_handler.warmup_iters);
     for (int i = 0; i < g_bench_handler.warmup_iters; ++i)
         csr_matrix_mul_vec(&g_bench_handler.mtx, &g_bench_handler.vec, &g_bench_handler.result);
 
@@ -131,6 +132,7 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
         return RC_INVALID_ARG_ERR;
     }
 
+    SLOG_DEBUG("Initializing empty benchmark results structure");
     *results = (struct BenchResults){
         .warmup_iters = g_bench_handler.warmup_iters,
         .runs = g_bench_handler.runs,
@@ -141,13 +143,15 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
         .max = 0U
     };
 
-    SLOG_DEBUG("runs = %d", results->runs);
+    SLOG_DEBUG("Allocating memory for benchmark samples array");
     enum ArenaReturnCode arena_res = arena_calloc(arena, sizeof(uint64_t), g_bench_handler.runs, &results->samples);
     if (arena_res != ARENA_RC_OK) {
         rc_set_err_msg("Memory array allocation failed in bench_run");
         return RC_MEM_ALLOC_ERR;
     }
+    SLOG_DEBUG("Memory allocated for benchmark samples array");
 
+    SLOG_INFO("Starting benchmark with %d runs", g_bench_handler.runs);
     uint64_t *samples = arena_get_ptr(&results->samples);
     for (int i = 0; i < g_bench_handler.runs; ++i) {
         uint64_t start = prv_bench_get_us();
@@ -170,11 +174,11 @@ int bench_run(struct BenchResults *results, struct ArenaHandler *arena) {
     results->mean /= (uint64_t)g_bench_handler.runs;
     results->stddev = prv_bench_compute_stddev(samples, g_bench_handler.runs, results->mean);
 
-    SLOG_DEBUG("Benchmark completed: mean=%llu us, stddev=%llu us, min=%llu us, max=%llu us",
-               results->mean,
-               results->stddev,
-               results->min,
-               results->max);
+    SLOG_INFO("Benchmark completed: mean=%llu us, stddev=%llu us, min=%llu us, max=%llu us",
+              results->mean,
+              results->stddev,
+              results->min,
+              results->max);
 
     return RC_OK;
 }
@@ -185,11 +189,14 @@ int bench_save_result(const struct BenchResults *results, const char *filename) 
         return RC_INVALID_ARG_ERR;
     }
 
+    SLOG_INFO("Saving benchmark results to file: %s", filename);
+    SLOG_INFO("Openning file for writing");
     FILE *fp = fopen(filename, "w");
     if (!fp) {
         rc_set_err_msg("Invalid file name provided to fopen - %s", strerror(errno));
         return RC_FILE_IO_ERR;
     }
+    SLOG_INFO("File opened correctly");
 
     fprintf(fp, "{\n\t\"warmup-iters\": %d,\n\t\"runs\": %d,\n\t\"samples\": [", results->warmup_iters, results->runs);
 

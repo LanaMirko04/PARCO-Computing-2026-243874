@@ -53,7 +53,7 @@ static inline bool prv_csr_matrix_is_compatible_with_vec(const struct CsrMatrix 
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_serial");
+    // SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_serial"); /*! disable logging for performance */
     int *row = arena_get_ptr(&mtx->row);
     int *col = arena_get_ptr(&mtx->col);
 
@@ -104,7 +104,7 @@ static int prv_csr_matrix_mul_vec_serial(const struct CsrMatrix *mtx, const stru
  * \return          RC_OK on success, an error code otherwise.
  */
 static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_omp");
+    // SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_omp"); /*! disable logging for performance */
     int *row = arena_get_ptr(&mtx->row);
     int *col = arena_get_ptr(&mtx->col);
 
@@ -152,7 +152,7 @@ static int prv_csr_matrix_mul_vec_omp(const struct CsrMatrix *mtx, const struct 
  */
 static int prv_csr_matrix_mul_vec_pthreads(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
     SLOG_DEBUG("Entering prv_csr_matrix_mul_vec_pthreads");
-    SLOG_DEBUG("Pthreads parallelism is not yet implemented for CSR matrix-vector multiplication.");
+    SLOG_WARN("Pthreads parallelism is not yet implemented for CSR matrix-vector multiplication.");
     UNUSED(mtx);
     UNUSED(vec);
     UNUSED(result);
@@ -171,11 +171,13 @@ int csr_matrix_from_coo(struct CsrMatrix *dest, const struct CooMatrix *src, str
     dest->col = src->col;
     dest->val = src->val;
 
+    SLOG_DEBUG("Allocating memory for CSR row pointer array of size: %d", dest->m + 1);
     enum ArenaReturnCode res = arena_calloc(arena, sizeof(int), dest->m + 1, &dest->row);
     if (res != ARENA_RC_OK) {
         rc_set_err_msg("Memory array allocation failed in csr_matrix_from_coo");
         return RC_MEM_ALLOC_ERR;
     }
+    SLOG_DEBUG("Memory allocated for CSR row pointer array");
 
     int *coo_row = arena_get_ptr(&src->row);
     int *csr_row = arena_get_ptr(&dest->row);
@@ -202,7 +204,7 @@ int csr_matrix_load_from_file(struct CsrMatrix *mtx, const char *filename, struc
 }
 
 int csr_matrix_mul_vec(const struct CsrMatrix *mtx, const struct Vec *vec, struct Vec *result) {
-    SLOG_DEBUG("Entering csr_matrix_mul_vec");
+    // SLOG_DEBUG("Entering csr_matrix_mul_vec"); /*! disable logging for performance */
     if (!mtx || !vec || !result) {
         rc_set_err_msg("Invalid NULL argument(s) provided to coo_matrix_mul_vec");
         return RC_INVALID_ARG_ERR;
