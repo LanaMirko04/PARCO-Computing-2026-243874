@@ -27,7 +27,7 @@ static void prv_cli_print_usage(FILE *os, const char *pgm_name) {
     fprintf(os, "Usage: %s -i <matrix_file> [-t num_threads] [-w warmup] [-r runs] [-v | -q]\n", pgm_name);
     fprintf(os, "Options:\n");
     fprintf(os, "  -i <matrix_file>     Input file containing the sparse matrix in Matrix Market format (required)\n");
-    fprintf(os, "  -t <num_threads>           Number of threads to use (Default: %d)\n", CONFIG_DEFAULT_NUM_THREADS);
+    fprintf(os, "  -t <num_threads>     Number of threads to use (Default: %d)\n", CONFIG_DEFAULT_NUM_THREADS);
     fprintf(os, "  -w <warmup>          Number of warm-up runs before benchmarking (Default: %d)\n", CONFIG_DEFAULT_WARMUP_ITERS);
     fprintf(os, "  -r <runs>            Number of benchmark runs (Default: %d)\n", CONFIG_DEFAULT_RUNS);
     fprintf(os, "  -v                   Enable DEBUG logging level\n");

@@ -1,6 +1,6 @@
 # Tools
 This directory contains various tools (scripts) used for matrix generation and result analysis. 
-Each tool is implemented as a Python script and can be executed from the command line.
+Each tool is implemented as a Python script (or bash script) and can be executed from the command line.
 
 ## Usage
 The first thing you need to do is to create a virtual environment and install the required dependencies listed in the `requirements.txt` file. You can do this by executing the following commands in your terminal:
