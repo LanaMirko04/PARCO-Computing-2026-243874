@@ -78,6 +78,9 @@ static int init(int argc, char *argv[]) {
 
 #ifdef CONFIG_ENABLE_OMP_PARALLELISM
     omp_init_lock(&g_omp_lock);
+
+    SLOG_INFO("Set OpenMP threads count to: %d", cli_args->num_threads);
+    omp_set_num_threads(cli_args->num_threads);
 #endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
 
     slog_init(&slog_cfg);
@@ -95,9 +98,6 @@ static int init(int argc, char *argv[]) {
         .runs = cli_args->runs,
         .arena = &g_arena_handler,
     };
-
-    SLOG_INFO("Set OpenMP threads count to: %d", cli_args->num_threads);
-    omp_set_num_threads(cli_args->num_threads);
 
     srand(time(NULL));
     int res = bench_init(&bench_cfg);
