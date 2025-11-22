@@ -109,10 +109,13 @@ static int init(int argc, char *argv[]) {
     /*! Get the filename only (removing path/to/file and extension) */
     const char *last_slash = strrchr(cli_args->input_file, '/');
     if (last_slash)
-        strncpy(g_bench_results_filename, last_slash + 1, strlen(last_slash + 1) - 3);
+        strncpy(g_bench_results_filename, last_slash + 1, CONFIG_BENCH_FILENAME_MAX_LEN - 1);
     else
-        strncpy(g_bench_results_filename, cli_args->input_file, strlen(cli_args->input_file) - 3);
-    strncat(g_bench_results_filename, "json", 5);
+        strncpy(g_bench_results_filename, cli_args->input_file, CONFIG_BENCH_FILENAME_MAX_LEN - 1);
+    char *dot = strrchr(g_bench_results_filename, '.');
+    if (dot)
+        *dot = '\0';
+    strncat(g_bench_results_filename, ".json", CONFIG_BENCH_FILENAME_MAX_LEN - strlen(g_bench_results_filename) - 1);
 
     SLOG_INFO("Benchmark results will be saved to '%s'", g_bench_results_filename);
     SLOG_INFO("Initialization completed successfully.");
