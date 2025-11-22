@@ -24,9 +24,10 @@ static struct CliArguments g_cli_args; /*!< Global CLI arguments structure */
  * \param           pgm_name: Name of the program.
  */
 static void prv_cli_print_usage(FILE *os, const char *pgm_name) {
-    fprintf(os, "Usage: %s -i <matrix_file> [-w warmup] [-r runs] [-v | -q]\n", pgm_name);
+    fprintf(os, "Usage: %s -i <matrix_file> [-t num_threads] [-w warmup] [-r runs] [-v | -q]\n", pgm_name);
     fprintf(os, "Options:\n");
     fprintf(os, "  -i <matrix_file>     Input file containing the sparse matrix in Matrix Market format (required)\n");
+    fprintf(os, "  -t <num_threads>           Number of threads to use (Default: %d)\n", CONFIG_DEFAULT_NUM_THREADS);
     fprintf(os, "  -w <warmup>          Number of warm-up runs before benchmarking (Default: %d)\n", CONFIG_DEFAULT_WARMUP_ITERS);
     fprintf(os, "  -r <runs>            Number of benchmark runs (Default: %d)\n", CONFIG_DEFAULT_RUNS);
     fprintf(os, "  -v                   Enable DEBUG logging level\n");
@@ -37,6 +38,7 @@ static void prv_cli_print_usage(FILE *os, const char *pgm_name) {
 const struct CliArguments *cli_parse_args(int argc, char *argv[]) {
     SLOG_DEBUG("Entering cli_parse_args");
     g_cli_args.input_file = NULL;
+    g_cli_args.num_threads = CONFIG_DEFAULT_NUM_THREADS;
     g_cli_args.warmup_iters = CONFIG_DEFAULT_WARMUP_ITERS;
     g_cli_args.runs = CONFIG_DEFAULT_RUNS;
     g_cli_args.log_lv = CONFIG_DEFAULT_LOG_LV;
@@ -50,10 +52,18 @@ const struct CliArguments *cli_parse_args(int argc, char *argv[]) {
     bool has_v = false;
     bool has_q = false;
 
-    while ((opt = getopt(argc, argv, "i:o:w:r:vqh")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:o:t:w:r:vqh")) != EOF) {
         switch (opt) {
             case 'i':
                 g_cli_args.input_file = optarg;
+                break;
+
+            case 't':
+                g_cli_args.num_threads = atoi(optarg);
+                if (g_cli_args.num_threads < 0) {
+                    fprintf(stderr, "Error: The number of threads must be >= 0\n");
+                    exit(EXIT_FAILURE);
+                }
                 break;
 
             case 'w':

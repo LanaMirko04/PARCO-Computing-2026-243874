@@ -16,6 +16,7 @@
  */
 struct CliArguments {
     char *input_file; /*!< Path to the input file */
+    int num_threads;  /*!< Number of threads */
     int warmup_iters; /*!< Number of warm-up iterations */
     int runs;         /*!< Number of benchmark runs */
     uint8_t log_lv;   /*!< Logging level */

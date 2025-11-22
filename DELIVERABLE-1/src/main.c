@@ -96,6 +96,9 @@ static int init(int argc, char *argv[]) {
         .arena = &g_arena_handler,
     };
 
+    SLOG_INFO("Set OpenMP threads count to: %d", cli_args->num_threads);
+    omp_set_num_threads(cli_args->num_threads);
+
     srand(time(NULL));
     int res = bench_init(&bench_cfg);
     if (res != RC_OK) {

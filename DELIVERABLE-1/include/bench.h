@@ -18,6 +18,7 @@
  */
 struct BenchConfig {
     char *filename;             /*!< The name of the Matrix Market file to be used. */
+    int thread_count;           /*!< The number of threads to use. */
     int warmup_iters;           /*!< The number of warmup iterations to perform. */
     int runs;                   /*!< The number of benchmark runs to perform. */
     struct ArenaHandler *arena; /*!< The arena handler to use for memory management. */

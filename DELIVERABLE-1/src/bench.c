@@ -27,6 +27,7 @@ struct BenchHandler {
     struct CsrMatrix mtx; /*!< Input matrix. */
     struct Vec vec;       /*!< Input vector. */
     struct Vec result;    /*!< Result matrix. */
+    int thread_count;     /*!< Number of threads */
     int warmup_iters;     /*!< Number of warmup iterations. */
     int runs;             /*!< Number of benchmark runs. */
 };
