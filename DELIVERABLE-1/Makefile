@@ -1,5 +1,5 @@
 CC       := gcc
-CFLAGS   := -std=c11 -Wall -Wextra -Werror -O3 -Iinclude
+CFLAGS   := -std=c11 -Wall -Wextra -Werror -O3 -Iinclude -D_POSIX_C_SOURCE=200809L
 # CFLAGS   := -std=c11 -g -Wall -Wextra -Werror -O0 -Iinclude
 
 # Add dependencies
