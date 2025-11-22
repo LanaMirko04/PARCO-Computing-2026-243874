@@ -1,4 +1,4 @@
-CC       := gcc
+CC       := gcc-9.1.0
 CFLAGS   := -std=c11 -Wall -Wextra -Werror -O3 -Iinclude -D_POSIX_C_SOURCE=200809L
 # CFLAGS   := -std=c11 -g -Wall -Wextra -Werror -O0 -Iinclude
 
@@ -7,6 +7,7 @@ CFLAGS += -Ilib/arena/include -Ilib/slog/include
 LDFLAGS  := -lm -Llib/arena/build -Llib/slog/build -larena -lslog
 
 ifeq ($(shell uname), Darwin)
+	CC := gcc
 	CFLAGS += -Xpreprocessor -I/opt/homebrew/opt/libomp/include
 	LDFLAGS += -L/opt/homebrew/opt/libomp/lib -lomp
 else
