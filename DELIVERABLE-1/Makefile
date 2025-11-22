@@ -17,7 +17,7 @@ BUILD_DIR := build
 SOURCES   := $(wildcard $(SRC_DIR)/*.c)
 OBJECTS   := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 
-EXEC_NAME := pgm
+EXEC_NAME := spvm
 TARGET   := $(BUILD_DIR)/$(EXEC_NAME)
 
 GREEN  := \033[1;32m

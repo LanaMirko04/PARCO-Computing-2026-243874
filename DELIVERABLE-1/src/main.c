@@ -9,17 +9,19 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <omp.h>
 
+#include "cli.h"
 #include "config.h"
 #include "arena.h"
 #include "rc.h"
 #include "slog.h"
-// #include "utils.h"
 #include "bench.h"
 
 static struct ArenaHandler g_arena_handler;
+static char g_bench_results_filename[CONFIG_BENCH_FILENAME_MAX_LEN];
 #ifdef CONFIG_ENABLE_OMP_PARALLELISM
 static omp_lock_t g_omp_lock;
 #endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]) {
         return res;
     }
 
-    bench_save_result(&bench_results, "bench_results.json");
+    bench_save_result(&bench_results, g_bench_results_filename);
 
     return EXIT_SUCCESS;
 }
@@ -63,20 +65,20 @@ static void exit_cs(void) {
 }
 
 static int init(int argc, char *argv[]) {
-    if (argc < 2) {
-        puts("Usage: ./pgm path/to/file.mtx");
-        return RC_FAIL;
-    }
+    const struct CliArguments *cli_args = cli_parse_args(argc, argv);
+
+    struct Slogger logger = SLOG_INIT_DEFAULT_LOGGER;
+    logger.lv = cli_args->log_lv;
+
+    const struct SlogConfig slog_cfg = {
+        .default_logger = logger,
+        .enter_cs = enter_cs,
+        .exit_cs = exit_cs,
+    };
 
 #ifdef CONFIG_ENABLE_OMP_PARALLELISM
     omp_init_lock(&g_omp_lock);
 #endif /*! CONFIG_ENABLE_OMP_PARALLELISM */
-
-    const struct SlogConfig slog_cfg = {
-        .default_logger = SLOG_INIT_DEFAULT_LOGGER,
-        .enter_cs = enter_cs,
-        .exit_cs = exit_cs,
-    };
 
     slog_init(&slog_cfg);
     SLOG_INFO("Initializing the program...");
@@ -88,9 +90,9 @@ static int init(int argc, char *argv[]) {
     }
 
     const struct BenchConfig bench_cfg = {
-        .filename = argv[1],
-        .warmup_iters = 4,
-        .runs = 10,
+        .filename = cli_args->input_file,
+        .warmup_iters = cli_args->warmup_iters,
+        .runs = cli_args->runs,
         .arena = &g_arena_handler,
     };
 
@@ -101,6 +103,15 @@ static int init(int argc, char *argv[]) {
         return RC_FAIL;
     }
 
+    // Get the filename only (removing path/to/file and extension)
+    const char *last_slash = strrchr(cli_args->input_file, '/');
+    if (last_slash)
+        strncpy(g_bench_results_filename, last_slash + 1, CONFIG_BENCH_FILENAME_MAX_LEN - 1);
+    else
+        strncpy(g_bench_results_filename, cli_args->input_file, CONFIG_BENCH_FILENAME_MAX_LEN - 1);
+    strncat(g_bench_results_filename, "json", 5);
+
+    SLOG_INFO("Benchmark results will be saved to '%s'", g_bench_results_filename);
     SLOG_INFO("Initialization completed successfully.");
 
     return RC_OK;
