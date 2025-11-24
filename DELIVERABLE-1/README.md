@@ -72,7 +72,10 @@ DELIBERABLE-1/
 - Python 3 (for running the tools)
 - Tools dependencies (listed in `tools/requirements.txt`)
 
-This program was tested on macOS and Linux systems. On macOS, I've used `clang-17.0.0` as C compiler and `python-3.14.0`. On Linux, I've used `gcc-9.x.x` and `python-3.x.x`.
+This program was tested on macOS and Linux systems. On macOS, I've used `clang-17.0.0` as C compiler and `python-3.14.0`. On Linux, I've used `gcc-9.1.0` and `python-3.10.14`.
+
+> [!WARNING]
+> On macOS, make sure an error will be raised if you don't change `%lu` to `%llu` in `src/bench.c`. On the unitn cluster, `gcc` treats I've received the same warning, but the opposite (change `%llu` to `%lu`).
 
 ## How to Compile and Run the Program
 To compile the code, run the following command in the terminal:
@@ -105,6 +108,6 @@ Options:
 ```
 
 > [!NOTE]
-By default, the progam will compile and run the parallel version. To run the sequntial version, uncomment `CONFIG_ENABLE_SERIAL_EXECUTION` in `include/config.h` before compiling the code, and comment `CONFIG_ENABLE_OMP_PARALLELISM`.
+By default, the progam will compile and run the parallel version. To run the sequntial version, uncomment `CONFIG_ENABLE_SERIAL_EXECUTION` in `include/config.h` before compiling the code, and comment `CONFIG_ENABLE_OMP_PARALLELISM`. Alternatively, you can run the parallel code with a single thread by setting the `-t` option to `1`.
 
 ...

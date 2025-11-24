@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -N psvm
+#PBS -o ./psvm.out
+#PBS -o ./psvm.err
+#PBS -q short_cpuQ
+#PBS -l walltime=1:00:00
+#PBS -l ncpus=64
+#PBS -l mem=64gb
+
+cd "$PBS_O_WORKDIR"
+
+./tools/task.sh

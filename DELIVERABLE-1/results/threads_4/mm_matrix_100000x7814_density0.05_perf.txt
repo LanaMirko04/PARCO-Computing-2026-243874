@@ -1,0 +1,21 @@
+--- BENCHMARK RUN: Sun Nov 23 23:03:13 CET 2025 ---
+File: /home/mirko.lana/PARCO-Computing-2026-243874/DELIVERABLE-1/matrices/mm_matrix_100000x7814_density0.05.mtx
+Threads: 4
+--------------------------------
+2025-11-23 23:03:14 [INFO] src/main.c:87 -> Initializing the program...
+2025-11-23 23:03:29 [INFO] src/main.c:120 -> Benchmark results will be saved to 'mm_matrix_100000x7814_density0.05.json'
+2025-11-23 23:03:29 [INFO] src/main.c:121 -> Initialization completed successfully.
+2025-11-23 23:03:29 [INFO] src/bench.c:122 -> Starting warmup with 5 iterations
+2025-11-23 23:03:30 [INFO] src/bench.c:155 -> Starting benchmark with 10 runs
+2025-11-23 23:03:30 [INFO] src/bench.c:178 -> Benchmark completed: mean=21028 us, stddev=776 us, min=20126 us, max=22461 us
+2025-11-23 23:03:30 [INFO] src/bench.c:193 -> Saving benchmark results to file: mm_matrix_100000x7814_density0.05.json
+2025-11-23 23:03:30 [INFO] src/bench.c:194 -> Openning file for writing
+2025-11-23 23:03:30 [INFO] src/bench.c:200 -> File opened correctly
+
+--- PERF REPORT ---
+# started on Sun Nov 23 23:03:14 2025
+
+31143440617,,L1-dcache-loads:u,17085145478,100.00,,
+518295955,,L1-dcache-load-misses:u,17085145478,100.00,1.66,of all L1-dcache hits
+1253945,,LLC-loads:u,17085145478,100.00,,
+356411,,LLC-load-misses:u,17085145478,100.00,28.42,of all LL-cache hits

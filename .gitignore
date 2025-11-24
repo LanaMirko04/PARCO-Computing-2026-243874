@@ -387,6 +387,7 @@ CMakeUserPresets.json
 **/target/
 .DS_Store
 Thumbs.db
+*.mtx
 
 ### Binary and compiled files ###
 *.bin
